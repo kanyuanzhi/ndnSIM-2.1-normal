@@ -127,6 +127,9 @@ public:
   void onContentStoreMiss( const Face &inFace, shared_ptr<pit::Entry> pitEntry,
                            const Interest &interest );
 
+
+  void onContentStoreHitCheck( const Face &inFace, shared_ptr<pit::Entry> pitEntry,
+                           const Interest &interest );
   /** \brief Content Store hit pipeline
   */
   void onContentStoreHit( const Face &inFace, shared_ptr<pit::Entry> pitEntry,
@@ -205,6 +208,15 @@ public:
   void dispatchToStrategy( shared_ptr<pit::Entry> pitEntry, Function trigger );
 #endif
 
+public:
+  struct m_interest_entry{
+    ndn::Name m_name;
+    shared_ptr<const Interest> m_interest;
+    shared_ptr<Face> m_face;
+    shared_ptr<pit::Entry> m_pitEntry;
+    shared_ptr<Data> m_match;
+  };
+
 private:
   ForwarderCounters m_counters;
 
@@ -219,6 +231,8 @@ private:
   StrategyChoice       m_strategyChoice;
   DeadNonceList        m_deadNonceList;
   shared_ptr<NullFace> m_csFace;
+
+  list<m_interest_entry> m_interest_store;
   array<Interest, 1000> m_test;
   int m_count = 0;
 

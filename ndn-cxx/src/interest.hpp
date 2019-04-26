@@ -450,7 +450,8 @@ private:
 
   int InterestSignalFlag =  0;
   std::string InterestPITList = "";
-  uint64_t InterestInface;
+  int InterestNodeIndex;
+  int InterestEntryIndex;
   
 public:
   const
@@ -483,23 +484,36 @@ public:
     m_wire.reset();
     return *this;
   }
-
 public:
   const
-  uint64_t&
-  getInterestInface() const
+  int&
+  getInterestNodeIndex() const
   {
-    return InterestInface;
+    return InterestNodeIndex;
   }
 
   Interest&
-  setInterestInface(const uint64_t& i)
+  setInterestNodeIndex(const int& i)
   {
-    InterestInface = i;
+    InterestNodeIndex = i;
     m_wire.reset();
     return *this;
   }
+public:
+  const
+  int&
+  getInterestEntryIndex() const
+  {
+    return InterestEntryIndex;
+  }
 
+  Interest&
+  setInterestEntryIndex(const int& i)
+  {
+    InterestEntryIndex = i;
+    m_wire.reset();
+    return *this;
+  }
 
 
 };

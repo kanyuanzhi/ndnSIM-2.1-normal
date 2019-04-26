@@ -95,8 +95,10 @@ enum {
 
   InterestSignalFlag = 33,
   InterestPITList = 34,
-  InterestInface = 35,
-  
+  InterestNodeIndex = 35,
+  InterestEntryIndex = 36,
+
+
 
   AppPrivateBlock1 = 128,
   AppPrivateBlock2 = 32767

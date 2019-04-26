@@ -231,7 +231,9 @@ Interest::wireEncode(EncodingImpl<TAG>& encoder) const
   totalLength += prependStringBlock(encoder, tlv::InterestPITList, getInterestPITList());
 
   totalLength += prependNonNegativeIntegerBlock(encoder, tlv::InterestSignalFlag, getInterestSignalFlag());
-  totalLength += prependNonNegativeIntegerBlock(encoder, tlv::InterestInface, getInterestInface());
+  totalLength += prependNonNegativeIntegerBlock(encoder, tlv::InterestNodeIndex, getInterestNodeIndex());
+  totalLength += prependNonNegativeIntegerBlock(encoder, tlv::InterestEntryIndex, getInterestEntryIndex());
+
 
   if (hasLink()) {
     if (hasSelectedDelegation()) {
@@ -371,9 +373,14 @@ Interest::wireDecode(const Block& wire)
     InterestSignalFlag = readNonNegativeInteger(*val);
   }
 
-  val = m_wire.find(tlv::InterestInface);
+  val = m_wire.find(tlv::InterestNodeIndex);
   if (val != m_wire.elements_end()) {
-    InterestInface = readNonNegativeInteger(*val);
+    InterestNodeIndex = readNonNegativeInteger(*val);
+  }
+
+  val = m_wire.find(tlv::InterestEntryIndex);
+  if (val != m_wire.elements_end()) {
+    InterestEntryIndex = readNonNegativeInteger(*val);
   }
 
 }

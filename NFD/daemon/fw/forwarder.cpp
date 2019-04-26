@@ -32,6 +32,7 @@
 #include "utils/ndn-ns3-packet-tag.hpp"
 
 #include <boost/random/uniform_int_distribution.hpp>
+#include <random>
 
 using namespace std;
 
@@ -108,15 +109,21 @@ Forwarder::onIncomingInterest(Face& inFace, const Interest& interest)
       shared_ptr<Data> match = m_csFromNdnSim->Lookup(interest.shared_from_this());
       if (match != nullptr) {
         // 如果命中缓存，则需要向服务器查询是否为最新内容
+        struct m_interest_entry ie;
+        ie.m_name = interest.getName();
+        ie.m_interest = const_pointer_cast<Interest>(interest.shared_from_this());
+        ie.m_face = const_pointer_cast<Face>(inFace.shared_from_this());
+        ie.m_pitEntry = pitEntry;
+        ie.m_match = match;
+
+        m_interest_store.push_front(ie);
+        cout<<m_interest_store.back().m_interest->getName()<<endl;
+        cout<<m_interest_store.back().m_face->getId()<<endl;
+
         const_cast<Interest&>(interest).setInterestSignalFlag(1);
-        m_test[0] = interest;
-        cout<<m_test[0].getName()<<endl;
+        this->onContentStoreHitCheck(inFace, pitEntry, interest);
 
-
-        // interest.setpitEntry(pitEntry);
-        // interest.setinterest(interest);
-        // interest.setMatch(*match);
-        this->onContentStoreHit(inFace, pitEntry, interest, *match);
+        //this->onContentStoreHit(inFace, pitEntry, interest, *match);
         
       }
       else {
@@ -127,6 +134,28 @@ Forwarder::onIncomingInterest(Face& inFace, const Interest& interest)
   else {
     this->onContentStoreMiss(inFace, pitEntry, interest);
   }
+}
+
+void
+Forwarder::onContentStoreHitCheck(const Face& inFace,
+                       shared_ptr<pit::Entry> pitEntry,
+                       const Interest& interest)
+{
+  NFD_LOG_DEBUG("onContentStoreHitCheck interest=" << interest.getName());
+
+  shared_ptr<Face> face = const_pointer_cast<Face>(inFace.shared_from_this());
+  // insert InRecord
+  pitEntry->insertOrUpdateInRecord(face, interest);
+
+  // set PIT unsatisfy timer
+  this->setUnsatisfyTimer(pitEntry);
+
+  // FIB lookup
+  shared_ptr<fib::Entry> fibEntry = m_fib.findLongestPrefixMatch(*pitEntry);
+
+  // dispatch to strategy
+  this->dispatchToStrategy(pitEntry, bind(&Strategy::afterReceiveInterest, _1,
+                                          cref(inFace), cref(interest), fibEntry, pitEntry));
 }
 
 void
