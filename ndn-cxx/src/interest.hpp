@@ -452,6 +452,7 @@ private:
   std::string InterestPITList = "";
   int InterestNodeIndex;
   int InterestEntryIndex;
+  int InterestTimestamp;
   
 public:
   const
@@ -514,7 +515,21 @@ public:
     m_wire.reset();
     return *this;
   }
+public:
+  const
+  int&
+  getInterestTimestamp() const
+  {
+    return InterestTimestamp;
+  }
 
+  Interest&
+  setInterestTimestamp(const int& i)
+  {
+    InterestTimestamp = i;
+    m_wire.reset();
+    return *this;
+  }
 
 };
 

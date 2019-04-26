@@ -79,10 +79,14 @@ main(int argc, char* argv[])
   // Installing applications
 
   // Consumer
-  ndn::AppHelper consumerHelper("ns3::ndn::ConsumerCbr");
+  ndn::AppHelper consumerHelper("ns3::ndn::ConsumerZipfMandelbrot");
   // Consumer will request /prefix/0, /prefix/1, ...
   consumerHelper.SetPrefix("/prefix");
   consumerHelper.SetAttribute("Frequency", StringValue("10")); // 10 interests a second
+  consumerHelper.SetAttribute("q", StringValue("0")); 
+  consumerHelper.SetAttribute("s", StringValue("0.7")); 
+  consumerHelper.SetAttribute("NumberOfContents", StringValue("23")); 
+
   consumerHelper.Install(nodes.Get(0));                        // first node
 
   // Producer

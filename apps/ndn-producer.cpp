@@ -30,8 +30,11 @@
 #include "helper/ndn-fib-helper.hpp"
 
 #include <memory>
+#include <random>
 
 NS_LOG_COMPONENT_DEFINE("ndn.Producer");
+
+using namespace std;
 
 namespace ns3 {
 namespace ndn {
@@ -65,7 +68,12 @@ Producer::GetTypeId(void)
          MakeUintegerChecker<uint32_t>())
       .AddAttribute("KeyLocator",
                     "Name to be used for key locator.  If root, then key locator is not used",
-                    NameValue(), MakeNameAccessor(&Producer::m_keyLocator), MakeNameChecker());
+                    NameValue(), MakeNameAccessor(&Producer::m_keyLocator), MakeNameChecker())
+      .AddAttribute(
+         "AverageUpdateTime",
+         "内容平均更新时间",
+         UintegerValue(10), MakeUintegerAccessor(&Producer::m_averageUpdateTime),
+         MakeUintegerChecker<uint32_t>());
   return tid;
 }
 
@@ -95,6 +103,8 @@ Producer::StopApplication()
 void
 Producer::OnInterest(shared_ptr<const Interest> interest)
 {
+  double tnow = ns3::Simulator::Now().GetSeconds();
+  int tnow_int = (int) tnow;
   App::OnInterest(interest); // tracing inside
 
   NS_LOG_FUNCTION(this << interest);
@@ -102,10 +112,90 @@ Producer::OnInterest(shared_ptr<const Interest> interest)
   if (!m_active)
     return;
 
-  Name dataName(interest->getName());
-  // dataName.append(m_postfix);
-  // dataName.appendVersion();
+  if ((int)(tnow * 10) % 10 != 0){
+      updateFlag = false;
+  }
+  if ((int)(tnow * 10) % 10 == 0 && (int)tnow !=0){
+    if (!updateFlag){
+      cout<<"!!!!!!!!!!!!!!!!!!!!!!!!!!!!"<<tnow<<endl;
+      updateFlag = true;
+      list<contentTimestampEntry>::iterator it;
+      for ( it=contentTimestampStore.begin(); it!=contentTimestampStore.end();++it ){
+        if (tnow_int - it->lastUpdateTime >= it->updateTime){
+          it->lastUpdateTime = tnow_int;
+        }
+      }
+    }
+  }
+  cout<<"signalAccount: "<<signalAccount<<endl;
+  cout<<"expirationSignalAccount: "<<expirationSignalAccount<<endl;
 
+
+  if (interest->getInterestSignalFlag() == 1){
+    signalAccount++;
+    shared_ptr<Data> data = GenerateData(interest);
+    data->setDataSignalFlag(1);
+    data->setDataNodeIndex(interest->getInterestNodeIndex());
+    if (CheckExpiration(interest)){
+      data->setDataExpiration(1);
+      expirationSignalAccount++;
+    }else{
+      data->setDataExpiration(0);
+    }
+    NS_LOG_INFO("node(" << GetNode()->GetId() << ") responding with Data: " << data->getName());
+
+    // to create real wire encoding
+    data->wireEncode();
+
+    m_transmittedDatas(data, this, m_face);
+    m_face->onReceiveData(*data);
+    
+  }else{
+    random_device r;
+    auto data = this->GenerateData(interest);
+
+    list<contentTimestampEntry>::iterator it;
+    bool exist = false;
+    for ( it=contentTimestampStore.begin(); it!=contentTimestampStore.end();++it ){
+      if (it->name == interest->getName()){
+        exist = true;
+        data->setDataTimestamp(it->lastUpdateTime);
+        break;
+      }
+    }
+    if (!exist){
+      default_random_engine updateTime_e(r());
+      uniform_int_distribution<int> updateTime_u(1, 2*m_averageUpdateTime-1);
+
+      struct contentTimestampEntry cte;
+      cte.name = interest->getName();
+      cte.updateTime = updateTime_u(updateTime_e);
+
+      default_random_engine lastUpdateTime_e(r());
+      uniform_int_distribution<int> lastUpdateTime_u(tnow_int-cte.updateTime+1,tnow_int);
+      cte.lastUpdateTime = lastUpdateTime_u(lastUpdateTime_e);
+
+      contentTimestampStore.push_front(cte);
+      data->setDataTimestamp(cte.lastUpdateTime);
+    }
+    // cout<<contentTimestampStore.size()<<endl;
+
+    
+  
+    NS_LOG_INFO("node(" << GetNode()->GetId() << ") responding with Data: " << data->getName());
+
+    // to create real wire encoding
+    data->wireEncode();
+
+    m_transmittedDatas(data, this, m_face);
+    m_face->onReceiveData(*data);
+  }
+
+  
+}
+
+shared_ptr<Data> Producer::GenerateData(shared_ptr<const Interest> interest){
+  Name dataName(interest->getName());
   auto data = make_shared<Data>();
   data->setName(dataName);
   data->setFreshnessPeriod(::ndn::time::milliseconds(m_freshness.GetMilliSeconds()));
@@ -124,13 +214,22 @@ Producer::OnInterest(shared_ptr<const Interest> interest)
 
   data->setSignature(signature);
 
-  NS_LOG_INFO("node(" << GetNode()->GetId() << ") responding with Data: " << data->getName());
+  return data;
+}
 
-  // to create real wire encoding
-  data->wireEncode();
 
-  m_transmittedDatas(data, this, m_face);
-  m_face->onReceiveData(*data);
+bool Producer::CheckExpiration(shared_ptr<const Interest> interest){
+  list<contentTimestampEntry>::iterator it;
+  for ( it=contentTimestampStore.begin(); it!=contentTimestampStore.end();++it ){
+    if (it->name == interest->getName()){
+      if (interest->getInterestTimestamp() == it->lastUpdateTime){
+        // 兴趣包的时间戳与服务器中该内容的时间戳一致，说明没有过期
+        return false;
+      }else{
+        return true;
+      }
+    }
+  }
 }
 
 } // namespace ndn

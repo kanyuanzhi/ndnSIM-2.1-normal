@@ -51,6 +51,25 @@ public:
   virtual void
   OnInterest(shared_ptr<const Interest> interest);
 
+  virtual shared_ptr<Data>
+  GenerateData(shared_ptr<const Interest> interest);
+
+  virtual bool
+  CheckExpiration(shared_ptr<const Interest> interest);
+
+  struct contentTimestampEntry{
+    Name name;
+    int updateTime;
+    int lastUpdateTime;
+  };
+
+  std::list<contentTimestampEntry> contentTimestampStore;
+
+  bool updateFlag = false;
+
+  int signalAccount = 0;
+  int expirationSignalAccount = 0;
+
 protected:
   // inherited from Application base class.
   virtual void
@@ -67,6 +86,8 @@ private:
 
   uint32_t m_signature;
   Name m_keyLocator;
+
+  uint32_t m_averageUpdateTime;
 };
 
 } // namespace ndn

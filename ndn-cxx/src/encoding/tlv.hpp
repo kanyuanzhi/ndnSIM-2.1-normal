@@ -97,6 +97,12 @@ enum {
   InterestPITList = 34,
   InterestNodeIndex = 35,
   InterestEntryIndex = 36,
+  InterestTimestamp = 37,
+
+  DataSignalFlag = 38,
+  DataTimestamp = 39,
+  DataExpiration = 40,
+  DataNodeIndex = 41,
 
 
 

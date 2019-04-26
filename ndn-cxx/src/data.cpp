@@ -60,6 +60,12 @@ Data::wireEncode(EncodingImpl<TAG>& encoder, bool unsignedPortion/* = false*/) c
   //            Signature
 
   // (reverse encoding)
+  totalLength += prependNonNegativeIntegerBlock(encoder, tlv::DataSignalFlag, getDataSignalFlag());
+  totalLength += prependNonNegativeIntegerBlock(encoder, tlv::DataTimestamp, getDataTimestamp());
+  totalLength += prependNonNegativeIntegerBlock(encoder, tlv::DataExpiration, getDataExpiration());
+  totalLength += prependNonNegativeIntegerBlock(encoder, tlv::DataNodeIndex, getDataNodeIndex());
+
+
 
   if (!unsignedPortion && !m_signature)
     {
@@ -164,6 +170,23 @@ Data::wireDecode(const Block& wire)
   Block::element_const_iterator val = m_wire.find(tlv::SignatureValue);
   if (val != m_wire.elements_end())
     m_signature.setValue(*val);
+
+  val = m_wire.find(tlv::DataSignalFlag);
+  if (val != m_wire.elements_end()) {
+    DataSignalFlag = readNonNegativeInteger(*val);
+  }
+  val = m_wire.find(tlv::DataTimestamp);
+  if (val != m_wire.elements_end()) {
+    DataTimestamp = readNonNegativeInteger(*val);
+  }
+  val = m_wire.find(tlv::DataExpiration);
+  if (val != m_wire.elements_end()) {
+    DataExpiration = readNonNegativeInteger(*val);
+  }
+  val = m_wire.find(tlv::DataNodeIndex);
+  if (val != m_wire.elements_end()) {
+    DataNodeIndex = readNonNegativeInteger(*val);
+  }
 }
 
 Data&

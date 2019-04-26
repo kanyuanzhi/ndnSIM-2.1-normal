@@ -328,6 +328,75 @@ private:
 
   nfd::LocalControlHeader m_localControlHeader;
   friend class nfd::LocalControlHeader;
+
+  int DataSignalFlag = 0;
+  int DataTimestamp;
+  int DataExpiration = 0;
+  int DataNodeIndex;
+
+public:
+  const
+  int&
+  getDataSignalFlag() const
+  {
+    return DataSignalFlag;
+  }
+
+  Data&
+  setDataSignalFlag(const int& i)
+  {
+    DataSignalFlag = i;
+    m_wire.reset();
+    return *this;
+  }
+
+public:
+  const
+  int&
+  getDataTimestamp() const
+  {
+    return DataTimestamp;
+  }
+
+  Data&
+  setDataTimestamp(const int& i)
+  {
+    DataTimestamp = i;
+    m_wire.reset();
+    return *this;
+  }
+
+public:
+  const
+  int&
+  getDataExpiration() const
+  {
+    return DataExpiration;
+  }
+
+  Data&
+  setDataExpiration(const int& i)
+  {
+    DataExpiration = i;
+    m_wire.reset();
+    return *this;
+  }
+
+public:
+  const
+  int&
+  getDataNodeIndex() const
+  {
+    return DataNodeIndex;
+  }
+
+  Data&
+  setDataNodeIndex(const int& i)
+  {
+    DataNodeIndex = i;
+    m_wire.reset();
+    return *this;
+  }
 };
 
 std::ostream&
