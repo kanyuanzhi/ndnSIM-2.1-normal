@@ -193,9 +193,9 @@ StrategyChoice::findEffectiveStrategy(shared_ptr<name_tree::Entry> nte) const
 Strategy&
 StrategyChoice::findEffectiveStrategy(const pit::Entry& pitEntry) const
 {
-  std::cout<<"findEffectiveStrategy: "<<pitEntry.getName()<<std::endl;
+  // std::cout<<"findEffectiveStrategy pitEntry: "<<pitEntry.getName()<<std::endl;
   shared_ptr<name_tree::Entry> nte = m_nameTree.get(pitEntry);
-  std::cout<<"findEffectiveStrategy: "<<nte->getPrefix()<<std::endl;
+  // std::cout<<"findEffectiveStrategy nte: "<<nte->getPrefix()<<std::endl;
   BOOST_ASSERT(static_cast<bool>(nte));
   return this->findEffectiveStrategy(nte);
 }

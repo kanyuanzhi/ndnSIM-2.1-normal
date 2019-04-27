@@ -95,6 +95,7 @@ int main( int argc, char *argv[] ) {
 
   // ndn::AppHelper consumerHelper( "ns3::ndn::ConsumerCbr" );
   // consumerHelper.SetAttribute("MaxSeq",IntegerValue(1000));
+  
   consumerHelper.SetAttribute( "Frequency", StringValue( request_rate ) );
   // Consumer will request /prefix/0, /prefix/1, ...
   // consumerHelper0.SetPrefix( "/prefix/c0" );
