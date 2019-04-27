@@ -17,7 +17,9 @@ AllowShortIfStatementsOnASingleLine: true
 #注释对齐
 AlignTrailingComments: true
 # 换行的时候对齐操作符
-#AlignOperands: true
+AlignOperands: true
+# 每行字符的长度
+ColumnLimit: 100
 # 中括号两边空格 [] 
 SpacesInSquareBrackets: true
 # 小括号两边添加空格

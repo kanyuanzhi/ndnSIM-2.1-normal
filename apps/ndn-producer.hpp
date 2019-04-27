@@ -88,6 +88,9 @@ private:
   Name m_keyLocator;
 
   uint32_t m_averageUpdateTime;
+  uint32_t m_maxPitstoreSize;
+  uint32_t m_exprimentTime;
+
 };
 
 } // namespace ndn

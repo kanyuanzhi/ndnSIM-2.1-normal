@@ -73,7 +73,15 @@ Producer::GetTypeId(void)
          "AverageUpdateTime",
          "内容平均更新时间",
          UintegerValue(10), MakeUintegerAccessor(&Producer::m_averageUpdateTime),
-         MakeUintegerChecker<uint32_t>());
+         MakeUintegerChecker<uint32_t>())
+      .AddAttribute(
+              "MaxPITStoreSize", "PITStore最大容量", StringValue( "100" ),
+              MakeUintegerAccessor( &Producer::m_maxPitstoreSize ),
+              MakeUintegerChecker<uint32_t>() )
+      .AddAttribute(
+          "ExprimentTime", "实验时长", StringValue( "150" ),
+          MakeUintegerAccessor( &Producer::m_exprimentTime ),
+          MakeUintegerChecker<uint32_t>() );;
   return tid;
 }
 
@@ -127,18 +135,20 @@ Producer::OnInterest(shared_ptr<const Interest> interest)
       }
     }
   }
-  cout<<"signalAccount: "<<signalAccount<<endl;
-  cout<<"expirationSignalAccount: "<<expirationSignalAccount<<endl;
+  // cout<<"signalAccount: "<<signalAccount<<endl;
+  // cout<<"expirationSignalAccount: "<<expirationSignalAccount<<endl;
 
 
   if (interest->getInterestSignalFlag() == 1){
-    signalAccount++;
+    if ( (int) tnow >= 41 && (int) tnow <= ( m_exprimentTime - 10 ) )
+      signalAccount++;
     shared_ptr<Data> data = GenerateData(interest);
     data->setDataSignalFlag(1);
     data->setDataNodeIndex(interest->getInterestNodeIndex());
     if (CheckExpiration(interest)){
       data->setDataExpiration(1);
-      expirationSignalAccount++;
+      if ( (int) tnow >= 41 && (int) tnow <= ( m_exprimentTime - 10 ) )
+        expirationSignalAccount++;
     }else{
       data->setDataExpiration(0);
     }

@@ -353,6 +353,7 @@ NameTree::get(const fib::Entry& fibEntry) const
 inline shared_ptr<name_tree::Entry>
 NameTree::get(const pit::Entry& pitEntry) const
 {
+  std::cout<<"NameTree::get: "<<pitEntry.getName()<<std::endl;
   return pitEntry.m_nameTreeEntry;
 }
 
