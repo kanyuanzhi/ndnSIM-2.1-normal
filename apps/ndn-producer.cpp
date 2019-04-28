@@ -126,6 +126,12 @@ Producer::OnInterest(shared_ptr<const Interest> interest)
   if ((int)(tnow * 10) % 10 == 0 && (int)tnow !=0){
     if (!updateFlag){
       cout<<"!!!!!!!!!!!!!!!!!!!!!!!!!!!!"<<tnow<<endl;
+      cout<<"signalAccount: "<<signalAccount<<endl;
+      //cout<<"validationSignalAccount: "<<signalAccount-expirationSignalAccount<<endl;
+      cout<<"expirationSignalAccount: "<<expirationSignalAccount<<endl;
+      cout<<"normalDataAccount: "<<normalDataAccount<<endl;
+      //cout<<"allDataAccount: "<<normalDataAccount+expirationSignalAccount<<endl;
+      cout<<"contentTimestampStoreSize: "<<contentTimestampStore.size()<<endl;
       updateFlag = true;
       list<contentTimestampEntry>::iterator it;
       for ( it=contentTimestampStore.begin(); it!=contentTimestampStore.end();++it ){
@@ -135,18 +141,20 @@ Producer::OnInterest(shared_ptr<const Interest> interest)
       }
     }
   }
-  // cout<<"signalAccount: "<<signalAccount<<endl;
-  // cout<<"expirationSignalAccount: "<<expirationSignalAccount<<endl;
+  
 
 
   if (interest->getInterestSignalFlag() == 1){
     if ( (int) tnow >= 41 && (int) tnow <= ( m_exprimentTime - 10 ) )
       signalAccount++;
-    shared_ptr<Data> data = GenerateData(interest);
+    shared_ptr<Data> data = this->GenerateData(interest);
     data->setDataSignalFlag(1);
     data->setDataNodeIndex(interest->getInterestNodeIndex());
-    if (CheckExpiration(interest)){
+    data->setDataPITList(interest->getInterestPITList());
+    pair <bool, int> result = this->CheckExpiration(interest);
+    if (result.first){
       data->setDataExpiration(1);
+      data->setDataTimestamp(result.second);
       if ( (int) tnow >= 41 && (int) tnow <= ( m_exprimentTime - 10 ) )
         expirationSignalAccount++;
     }else{
@@ -161,6 +169,9 @@ Producer::OnInterest(shared_ptr<const Interest> interest)
     m_face->onReceiveData(*data);
     
   }else{
+    if ( (int) tnow >= 41 && (int) tnow <= ( m_exprimentTime - 10 ) )
+      normalDataAccount++;
+    
     random_device r;
     auto data = this->GenerateData(interest);
 
@@ -174,16 +185,17 @@ Producer::OnInterest(shared_ptr<const Interest> interest)
       }
     }
     if (!exist){
-      default_random_engine updateTime_e(r());
-      uniform_int_distribution<int> updateTime_u(1, 2*m_averageUpdateTime-1);
+      // default_random_engine updateTime_e(r());
+      // uniform_int_distribution<int> updateTime_u(1, 2*m_averageUpdateTime-1);
 
       struct contentTimestampEntry cte;
       cte.name = interest->getName();
-      cte.updateTime = updateTime_u(updateTime_e);
-
+      //cte.updateTime = updateTime_u(updateTime_e);
+      cte.updateTime = m_averageUpdateTime;
       default_random_engine lastUpdateTime_e(r());
       uniform_int_distribution<int> lastUpdateTime_u(tnow_int-cte.updateTime+1,tnow_int);
       cte.lastUpdateTime = lastUpdateTime_u(lastUpdateTime_e);
+      //cte.lastUpdateTime = 0;
 
       contentTimestampStore.push_front(cte);
       data->setDataTimestamp(cte.lastUpdateTime);
@@ -228,15 +240,15 @@ shared_ptr<Data> Producer::GenerateData(shared_ptr<const Interest> interest){
 }
 
 
-bool Producer::CheckExpiration(shared_ptr<const Interest> interest){
+pair<bool,int> Producer::CheckExpiration(shared_ptr<const Interest> interest){
   list<contentTimestampEntry>::iterator it;
   for ( it=contentTimestampStore.begin(); it!=contentTimestampStore.end();++it ){
     if (it->name == interest->getName()){
       if (interest->getInterestTimestamp() == it->lastUpdateTime){
         // 兴趣包的时间戳与服务器中该内容的时间戳一致，说明没有过期
-        return false;
+        return {false, it->lastUpdateTime};
       }else{
-        return true;
+        return {true, it->lastUpdateTime};
       }
     }
   }

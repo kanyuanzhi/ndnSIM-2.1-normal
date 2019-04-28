@@ -54,7 +54,7 @@ public:
   virtual shared_ptr<Data>
   GenerateData(shared_ptr<const Interest> interest);
 
-  virtual bool
+  virtual std::pair<bool,int>
   CheckExpiration(shared_ptr<const Interest> interest);
 
   struct contentTimestampEntry{
@@ -68,7 +68,10 @@ public:
   bool updateFlag = false;
 
   int signalAccount = 0;
+  int validationSignalAccount = 0;
   int expirationSignalAccount = 0;
+  int normalDataAccount = 0;
+  int allDataAccount = 0;
 
 protected:
   // inherited from Application base class.

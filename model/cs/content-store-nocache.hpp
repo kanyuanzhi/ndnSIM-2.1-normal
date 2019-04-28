@@ -59,6 +59,9 @@ public:
   Add(shared_ptr<const Data> data);
 
   virtual void
+  Erase(shared_ptr<const Data> data);
+
+  virtual void
   Print(std::ostream& os) const;
 
   virtual uint32_t

@@ -63,6 +63,11 @@ Nocache::Add(shared_ptr<const Data> data)
 }
 
 void
+Nocache::Erase(shared_ptr<const Data> data)
+{
+}
+
+void
 Nocache::Print(std::ostream& os) const
 {
 }

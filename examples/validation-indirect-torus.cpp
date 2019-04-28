@@ -47,11 +47,11 @@ int main( int argc, char *argv[] ) {
       "src/ndnSIM/examples/topologies/torus-grid-5.txt" );
   topologyReader.Read();
 
-  string strategy_name       = "Normal";
-  string zipf                = "0.7"; // 齐普夫参数
+  string strategy_name       = "Indirect";
+  string zipf                = "0.8"; // 齐普夫参数
   string cache_size          = "100";  // 缓存大小
   string request_rate        = "10";  // 请求速率
-  string average_update_time = "20";  // 更新时间
+  string average_update_time = "110";  // 更新时间
   string pit_store_size      = "80";  // PITCS表大小
   string update_factor =
       "1.0"; // 更新因子，0表示同一内容内容更新时间不变，1表示更新时间在内容到期后必变
@@ -138,7 +138,7 @@ int main( int argc, char *argv[] ) {
 
   Simulator::Stop( Seconds( stod( experiment_time ) ) );
 
-  ndn::L3RateTracer::InstallAll( rate_trace, Seconds( 1.0 ) );
+  // ndn::L3RateTracer::InstallAll( rate_trace, Seconds( 1.0 ) );
 
   // ndn::CsTracer::InstallAll( "cs-trace.txt", Seconds( 1 ) );
 

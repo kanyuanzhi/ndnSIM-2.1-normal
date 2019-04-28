@@ -130,6 +130,8 @@ public:
 
   void onContentStoreHitCheck( const Face &inFace, shared_ptr<pit::Entry> pitEntry,
                            const Interest &interest );
+  void onInterestSignalForward( const Face &inFace, shared_ptr<pit::Entry> pitEntry,
+                                    const Interest &interest ) ;
   /** \brief Content Store hit pipeline
   */
   void onContentStoreHit( const Face &inFace, shared_ptr<pit::Entry> pitEntry,
@@ -233,8 +235,7 @@ private:
   shared_ptr<NullFace> m_csFace;
 
   list<m_interest_entry> m_interest_store;
-  array<Interest, 1000> m_test;
-  int m_count = 0;
+
 
   ns3::Ptr<ns3::ndn::ContentStore> m_csFromNdnSim;
 

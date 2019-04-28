@@ -333,6 +333,7 @@ private:
   int DataTimestamp;
   int DataExpiration = 0;
   int DataNodeIndex;
+  std::string DataPITList = "";
 
 public:
   const
@@ -394,6 +395,22 @@ public:
   setDataNodeIndex(const int& i)
   {
     DataNodeIndex = i;
+    m_wire.reset();
+    return *this;
+  }
+
+public:
+  const
+  std::string&
+  getDataPITList() const
+  {
+    return DataPITList;
+  }
+
+  Data&
+  setDataPITList(const std::string& str)
+  {
+    DataPITList = str;
     m_wire.reset();
     return *this;
   }

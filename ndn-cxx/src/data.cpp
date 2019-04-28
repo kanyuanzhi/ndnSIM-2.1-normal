@@ -64,6 +64,7 @@ Data::wireEncode(EncodingImpl<TAG>& encoder, bool unsignedPortion/* = false*/) c
   totalLength += prependNonNegativeIntegerBlock(encoder, tlv::DataTimestamp, getDataTimestamp());
   totalLength += prependNonNegativeIntegerBlock(encoder, tlv::DataExpiration, getDataExpiration());
   totalLength += prependNonNegativeIntegerBlock(encoder, tlv::DataNodeIndex, getDataNodeIndex());
+  totalLength += prependStringBlock(encoder, tlv::DataPITList, getDataPITList());
 
 
 
@@ -186,6 +187,10 @@ Data::wireDecode(const Block& wire)
   val = m_wire.find(tlv::DataNodeIndex);
   if (val != m_wire.elements_end()) {
     DataNodeIndex = readNonNegativeInteger(*val);
+  }
+  val = m_wire.find(tlv::DataPITList);
+  if (val != m_wire.elements_end()) {
+    DataPITList = readString(*val);
   }
 }
 

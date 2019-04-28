@@ -103,7 +103,7 @@ enum {
   DataTimestamp = 39,
   DataExpiration = 40,
   DataNodeIndex = 41,
-
+  DataPITList = 42,
 
 
   AppPrivateBlock1 = 128,
